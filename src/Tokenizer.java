@@ -112,10 +112,6 @@ public class Tokenizer {
         return res.toString();
     }
 
-    private SchemeIdentifier nextIdentifier() throws IOException {
-        return new SchemeIdentifier(nextToken());
-    }
-
     public Value nextValue() throws IOException {
         char c;
 
@@ -166,7 +162,7 @@ public class Tokenizer {
                     case 'r': res.append('\r'); break;
                     case 'b': res.append('\b'); break;
                     case '\'': res.append('\''); break;
-                    default: /* dunno */ break;
+                    default: /* TODO dunno */ break;
                 }
 
                 isEscaped = false;
@@ -203,9 +199,5 @@ public class Tokenizer {
         back();
 
         return new SchemeNum(res);
-        /*
-        next();
-        return new SchemeNum(42);
-        */
     }
 }
