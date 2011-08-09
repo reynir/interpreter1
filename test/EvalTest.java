@@ -18,13 +18,19 @@ public class EvalTest {
         Frame env = new Frame();
         try {
             while (true) {
-                System.out.print("$$ ");
-                System.out.flush();
-                res = t.nextValue();
-                System.out.println(Evaluator.eval(res, env));
+                try {
+                    System.out.print("$$ ");
+                    System.out.flush();
+                    res = t.nextValue();
+                    System.out.println(Evaluator.eval(res, env));
+                } catch(StackOverflowError e) {
+                    System.err.println("Stack overflow!");
+                }
             }
         } catch(EOFException e) {
             // ignore
+        } catch (StackOverflowError e) {
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -77,7 +77,6 @@ public class Evaluator {
     public static boolean isApplication(Value exp) {
         if (!(exp instanceof Pair))
             return false;
-        // maybe reserved keywords check?
         return ((Pair) exp).isProperList();
     }
 
