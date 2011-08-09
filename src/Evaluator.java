@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.ArrayList;
 
 public class Evaluator {
 
@@ -8,6 +9,7 @@ public class Evaluator {
         } else if (isQuoted(exp)) {
             return getQuotationText(exp);
         } else if (isVariable(exp)) {
+            Value v = env.getBindingValue((SchemeIdentifier) exp);
             return env.getBindingValue((SchemeIdentifier) exp);
         } else if (isDefinition(exp)) {
             return evalDefinition(exp, env);
@@ -22,7 +24,7 @@ public class Evaluator {
                     getListOfValues(getOperands(exp), env));
         } else {
             // throw new UnknownExpressionTypeException(String.format("Unknown expression: ~s", exp));
-            return new SchemeIdentifier("This should have been an exception");
+            return new SchemeSymbol("This should have been an exception");
         }
     }
 
@@ -30,8 +32,7 @@ public class Evaluator {
     }
 
     /* TODO: more self-evaluating types */
-    public static boolean isSelfEvaluating(Value exp) {
-        if (exp instanceof SchemeNum ||
+    public static boolean isSelfEvaluating(Value exp) { if (exp instanceof SchemeNum ||
                 exp instanceof SchemeString) {
             return true;
         } else {
@@ -40,16 +41,7 @@ public class Evaluator {
     }
 
     public static boolean isQuoted(Value exp) {
-        if (!(exp instanceof Cons))
-            return false;
-        Cons quote = (Cons) exp;
-        if (quote.car() instanceof Quote) {
-            if (!(quote.cdr() instanceof Cons))
-                return false; //FIXME exception
-            return ((Cons) quote.cdr()).isProperListOfLength(1);
-        } else {
-            return false;
-        }
+        return exp instanceof Quote;
     }
 
     public static boolean isVariable(Value exp) {
@@ -80,42 +72,54 @@ public class Evaluator {
     }
 
     public static Value getQuotationText(Value exp) {
-        Cons fst = (Cons) exp;
-        Cons rst = (Cons) fst.cdr();
-        return rst.car();
+        Quote q = (Quote) exp;
+        return q.getQuotationText();
     }
 
     public static Value evalDefinition(Value exp, Frame env) {
-        return new SchemeIdentifier("Definitions-not-yet-implemented");
+        return new SchemeSymbol("Definitions-not-yet-implemented");
     }
 
     public static Value evalAssignment(Value exp, Frame env) {
-        return new SchemeIdentifier("Assignments-not-yet-implemented");
+        return new SchemeSymbol("Assignments-not-yet-implemented");
     }
 
     public static Value evalIf(Value exp, Frame env) {
-        return new SchemeIdentifier("Ifs-not-yet-implemented");
+        return new SchemeSymbol("Ifs-not-yet-implemented");
     }
 
     public static Value evalConditional(Value exp, Frame env) {
-        return new SchemeIdentifier("Conditionals-not-yet-implemented");
+        return new SchemeSymbol("Conditionals-not-yet-implemented");
     }
 
     public static Value apply(Value operator, List<Value> operands) {
+        if (operator instanceof Primitive)
+            return ((Primitive) operator).apply(operands);
         return new
-            SchemeIdentifier("Procedure-applications-not-yet-implemented");
+            SchemeSymbol("Procedure-applications-not-yet-implemented");
     }
 
-    // FIXME
     public static List<Value> getListOfValues(List<Value> exps, Frame env) {
-        return null;
+        List<Value> res = new ArrayList<Value>(exps.size());
+
+        for (Value v : exps) {
+            res.add(eval(v, env));
+        }
+
+        return res;
     }
 
     public static List<Value> getOperands(Value exp) {
-        return null;
+        Cons c = (Cons) exp;
+        Value v = c.cdr();
+        if (v instanceof Null)
+            return new ArrayList<Value>();
+        c = (Cons) v;
+        return c.toList();
     }
 
     public static Value getOperator(Value exp) {
-        return null;
+        Cons c = (Cons) exp;
+        return c.car();
     }
 }

@@ -23,9 +23,12 @@ public class Frame {
 
     /** Top level frame. */
     public Frame() {
-        // FIXME?
         this.bindings = new HashMap<SchemeIdentifier, Value>();
         this.enclosingFrame = null;
+
+        addBinding(new SchemeIdentifier("+"), new Plus());
+        addBinding(new SchemeIdentifier("bob"), 
+                new SchemeSymbol("Hej-bob"));
     }
 
     public void setBang(SchemeIdentifier id, Value v) {
@@ -47,6 +50,7 @@ public class Frame {
             return enclosingFrame.getBindingValue(id);
         } else {
             // throw new Exception("Foo is not bound"); // FIXME
+            System.err.println("Warning: "+id+" is not bound"); //FIXME
             return null; // dummy
         }
     }

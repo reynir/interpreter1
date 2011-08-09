@@ -12,13 +12,20 @@ import java.io.Reader;
 import java.io.StringReader;
 
 public class Tokenizer {
-    private int character;
     private boolean eof;
     private int index;
+    private int mark_index;
+    private int character;
+    private int mark_character;
     private int line;
+    private int mark_line;
     private char previous;
-    private Reader reader;
+    private char mark_previous;
     private boolean usePrevious;
+    private boolean mark_usePrevious;
+    private boolean isMarkSet;
+    private Reader reader;
+
     private static final char EOList = ')';
     private static final char BOList = '(';
 
@@ -31,6 +38,7 @@ public class Tokenizer {
         this.index = 0;
         this.character = 1;
         this.line = 1;
+        this.isMarkSet = false;
     }
 
     public Tokenizer(InputStream inputStream) {
@@ -51,6 +59,34 @@ public class Tokenizer {
             line -= 1;
         usePrevious = true;
         eof = false;
+    }
+
+    public void mark() throws IOException {
+        if (isMarkSet) {
+            // Noo!
+        }
+
+        mark_index = index;
+        mark_character = character;
+        mark_line = line;
+        mark_previous = previous;
+        mark_usePrevious = usePrevious;
+        isMarkSet = true;
+        reader.mark(50);
+    }
+
+    public void reset() throws IOException {
+        if (!isMarkSet) {
+            // Noo!
+        }
+
+        index = mark_index;
+        character = mark_character;
+        line = mark_line;
+        previous = mark_previous;
+        usePrevious = mark_usePrevious;
+        isMarkSet = false;
+        reader.reset();
     }
 
     public char next() throws IOException {
@@ -99,17 +135,29 @@ public class Tokenizer {
         }
     }
 
-    private String nextToken() throws IOException {
-        StringBuilder res = new StringBuilder();
+    private String nextToken() throws IOException, EmptyTokenException {
+        StringBuilder tok = new StringBuilder();
+        skipSpace();
         char c = next();
 
         while (!isReservedChar(c) && !Character.isWhitespace(c)) {
-            res.append(c);
+            tok.append(c);
             c = next();
         }
         back();
 
-        return res.toString();
+        String res = tok.toString();
+        if ("".equals(res))
+            throw new EmptyTokenException();
+        return res;
+    }
+
+    private SchemeSymbol nextSymbol() throws IOException, EmptyTokenException {
+        return new SchemeSymbol(nextToken());
+    }
+
+    private SchemeIdentifier nextIdentifier() throws IOException, EmptyTokenException {
+        return new SchemeIdentifier(nextToken());
     }
 
     public Value nextValue() throws IOException {
@@ -119,21 +167,38 @@ public class Tokenizer {
             case '"': return nextString();
             case BOList: 
                       next();
-                      return nextCons();
+                      return firstCons();
             case EOList: throw new IOException("Unexpected end of list"); // FIXME
         }
         if (Character.isDigit(c) || c == '-')
             return nextNum();
         
-        String res = nextToken();
+        String res;
+        try {
+            res = nextToken();
+        } catch (EmptyTokenException e) {
+            throw new IOException("FIXME");
+        }
+
         if ("quote".equals(res)) {
-            return new Quote();
+            throw new IOException("Illegal quote something"); //FIXME
         } else {
-            return nextIdentifier();
+            return new SchemeIdentifier(res);
         }
     }
 
-    public Cons nextCons() throws IOException {
+    private Value firstCons() throws IOException {
+        // Is it special form?
+        mark();
+        String t;
+        try {
+            t = nextToken();
+            if ("quote".equals(t))
+                return nextQuote();
+        } catch (EmptyTokenException e) {}
+        reset();
+        // not special form
+
         Value car = nextValue();
         if (skipSpace() == EOList) {
             next();
@@ -141,6 +206,74 @@ public class Tokenizer {
         } else {
             return new Cons(car, nextCons());
         }
+    }
+
+    private Value nextCons() throws IOException {
+        Value car = nextValue();
+        if (skipSpace() == EOList) {
+            next();
+            return new Cons(car, Cons.NULL);
+        } else {
+            return new Cons(car, nextCons());
+        }
+    }
+
+    public Quote nextQuote() throws IOException {
+        skipSpace();
+        Value q = nextQuotation();
+        if (skipSpace() != EOList)
+            throw new IOException("Expected end of list"); // FIXME
+        next();
+        return new Quote(q);
+    }
+
+    public Lambda nextLambda() throws IOException {
+        if (skipSpace() == BOList) {
+
+        } else {
+            SchemeIdentifier formals;
+            try {
+                formals = nextIdentifier();
+            }catch (EmptyTokenException e) {
+                throw new IOException("Illegal lambda expression");
+            }
+        }
+        return null; //FIXME
+    }
+
+    public Value nextQuotation() throws IOException {
+        char c = skipSpace();
+        switch (c) {
+            case BOList:
+                next();
+                return nextQuotedList();
+            case '"':
+                return nextString();
+        }
+
+        if (Character.isDigit(c) || c == '-')
+            return nextNum();
+
+        try {
+            return nextSymbol();
+        } catch (EmptyTokenException e) {
+            throw new IOException("Empty token!"); //FIXME
+        }
+    }
+
+    public Cons nextQuotedList() throws IOException {
+        Value car = nextQuotation();
+        if (skipSpace() == EOList) {
+            next();
+            return new Cons(car, Cons.NULL);
+        } else {
+            return new Cons(car, nextQuotedList());
+        }
+    }
+
+    //FIXME
+    private Cons nextQuotedCons() {
+        return new Cons(new SchemeSymbol("Not"), new SchemeSymbol("Implemented"));
     }
 
     public SchemeString nextString() throws IOException {
@@ -199,5 +332,9 @@ public class Tokenizer {
         back();
 
         return new SchemeNum(res);
+    }
+
+    private class EmptyTokenException extends Exception {
+
     }
 }

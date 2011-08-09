@@ -10,4 +10,13 @@ public class SchemeNum implements Value {
     public String toString() {
         return "SchemeNum["+v+"]";
     }
+
+    public int getValue() {
+        return v;
+    }
+
+    public boolean equals(Object o) {
+        return (o instanceof SchemeNum) &&
+            ((SchemeNum) o).v == v;
+    }
 }

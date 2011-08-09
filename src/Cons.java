@@ -32,6 +32,19 @@ public class Cons implements Value {
         return false;
     }
 
+    public List<Value> toList() {
+        Cons c;
+        Value v = this;
+        List<Value> res = new ArrayList<Value>();
+        do {
+            c = (Cons) v;
+            res.add(c.car());
+            v = c.cdr();
+        } while (v != NULL);
+
+        return res;
+    }
+
     public Value car() {
         return this.car;
     }
@@ -39,4 +52,5 @@ public class Cons implements Value {
     public Value cdr() {
         return this.cdr;
     }
+
 }

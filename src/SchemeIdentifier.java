@@ -10,4 +10,15 @@ public class SchemeIdentifier implements Value {
     public String toString() {
         return "SchemeIdentifier["+id+"]";
     }
+
+    public boolean equals(Object other) {
+        if (!(other instanceof SchemeIdentifier))
+            return false;
+        SchemeIdentifier o = (SchemeIdentifier) other;
+        return o.id.equals(id);
+    }
+
+    public int hashCode() {
+        return id.hashCode();
+    }
 }
