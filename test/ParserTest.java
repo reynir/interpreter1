@@ -1,3 +1,5 @@
+import interpreter.Tokenizer;
+
 import java.io.EOFException;
 
 public class ParserTest {

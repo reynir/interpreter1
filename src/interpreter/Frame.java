@@ -1,7 +1,10 @@
+package interpreter;
+import interpreter.values.*;
+import interpreter.values.primitives.*;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
-import java.util.LinkedList;
 
 public class Frame {
     private final Map<SchemeIdentifier, Value> bindings;
@@ -26,9 +29,15 @@ public class Frame {
         this.bindings = new HashMap<SchemeIdentifier, Value>();
         this.enclosingFrame = null;
 
-        addBinding(new SchemeIdentifier("+"), new Plus());
-        addBinding(new SchemeIdentifier("bob"), 
-                new SchemeSymbol("Hej-bob"));
+        addBinding("+", new Plus());
+        addBinding("bob", new SchemeSymbol("Hej-bob"));
+        addBinding("null", Null.NULL);
+        addBinding("cons", new Cons());
+        addBinding("car", new Car());
+        addBinding("cdr", new Cdr());
+        addBinding(">", new Compare.GreaterThan());
+        addBinding("<", new Compare.LessThan());
+        addBinding("=", new Compare.Equal());
     }
 
     public void setBang(SchemeIdentifier id, Value v) {
@@ -60,6 +69,10 @@ public class Frame {
             System.err.println("Warning: Foo is already bound"); //FIXME
         bindings.put(id, v);
 
+    }
+
+    public void addBinding(String id, Value v) {
+        addBinding(new SchemeIdentifier(id), v);
     }
 
     /** @return returns null if there's no enclosing frame */

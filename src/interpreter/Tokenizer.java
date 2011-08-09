@@ -1,7 +1,10 @@
+package interpreter;
 /* vim: set et sts=4 sw=4:
  * Loosely based on
  * https://github.com/douglascrockford/JSON-java/blob/master/JSONTokener.java
  */
+
+import interpreter.values.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +13,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.List;
+import java.util.ArrayList;
+import java.math.BigInteger;
+import java.math.BigDecimal;
 
 public class Tokenizer {
     private boolean eof;
@@ -72,7 +79,7 @@ public class Tokenizer {
         mark_previous = previous;
         mark_usePrevious = usePrevious;
         isMarkSet = true;
-        reader.mark(50);
+        reader.mark(100); // what an arbitrary number
     }
 
     public void reset() throws IOException {
@@ -164,14 +171,30 @@ public class Tokenizer {
         char c;
 
         switch (c=skipSpace()) {
-            case '"': return nextString();
+            case '"': 
+                return nextString();
             case BOList: 
-                      next();
-                      return firstCons();
-            case EOList: throw new IOException("Unexpected end of list"); // FIXME
+                next();
+                return firstCons();
+            case EOList: 
+                throw new EndOfListException(); // FIXME
+            case '#':
+                next();
+                c = next(); 
+                if (c == 't')
+                    return SchemeBoolean.TRUE;
+                if (c == 'f')
+                    return SchemeBoolean.FALSE;
+                else
+                    System.err.println("Implement hash marks");
         }
-        if (Character.isDigit(c) || c == '-')
-            return nextNum();
+        if (Character.isDigit(c) || c == '-') {
+            mark();
+            String s = nextToken();
+            try {
+                return nextNum(s);
+            } catch (NumberFormatException e) {}
+        }
         
         String res;
         try {
@@ -195,6 +218,12 @@ public class Tokenizer {
             t = nextToken();
             if ("quote".equals(t))
                 return nextQuote();
+            if ("lambda".equals(t))
+                return nextLambda();
+            if ("if".equals(t))
+                return nextIf();
+            if ("define".equals(t))
+            	return nextDefine();
         } catch (EmptyTokenException e) {}
         reset();
         // not special form
@@ -202,9 +231,9 @@ public class Tokenizer {
         Value car = nextValue();
         if (skipSpace() == EOList) {
             next();
-            return new Cons(car, Cons.NULL);
+            return new Pair(car, Pair.NULL);
         } else {
-            return new Cons(car, nextCons());
+            return new Pair(car, nextCons());
         }
     }
 
@@ -212,10 +241,32 @@ public class Tokenizer {
         Value car = nextValue();
         if (skipSpace() == EOList) {
             next();
-            return new Cons(car, Cons.NULL);
+            return new Pair(car, Pair.NULL);
         } else {
-            return new Cons(car, nextCons());
+            return new Pair(car, nextCons());
         }
+    }
+
+    private If nextIf() throws IOException {
+        Value test, then, otherwise;
+
+        test = nextValue();
+        then = nextValue();
+        otherwise = nextValue();
+        skipSpace();
+        if (next() != EOList)
+            throw new IOException("Noo, wrong if!");
+
+        return new If(test, then, otherwise);
+    }
+    
+    private Define nextDefine() throws IOException {
+    	SchemeIdentifier id = nextIdentifier();
+    	Value val = nextValue();
+    	skipSpace();
+    	if (next() != EOList)
+    		throw new EndOfListException();
+    	return new Define(id, val);
     }
 
     public Quote nextQuote() throws IOException {
@@ -228,8 +279,42 @@ public class Tokenizer {
     }
 
     public Lambda nextLambda() throws IOException {
-        if (skipSpace() == BOList) {
+        LambdaFormals lf = nextLambdaFormals();
 
+        Value first;
+        List<Value> rest = new ArrayList<Value>();
+
+        first = nextValue();
+        try {
+            while (true)
+                rest.add(nextValue());
+        } catch (EndOfListException e) {}
+
+        skipSpace();
+        if (next() != EOList)
+            throw new IOException("Unexpected end of list");
+
+        return new Lambda(lf, first, rest.toArray(new Value[0]));
+    }
+
+    public LambdaFormals nextLambdaFormals() throws IOException {
+        if (skipSpace() == BOList) {
+            List<SchemeIdentifier> res = new ArrayList<SchemeIdentifier>();
+            next();
+
+            while (true) {
+                try {
+                    SchemeIdentifier id = nextIdentifier();
+                    res.add(id);
+                } catch(EmptyTokenException e) {
+                    break;
+                }
+            }
+            if (next() != EOList)
+                throw new IOException("wut"); //FIXME
+            if (res.size() == 0)
+                return new LambdaFormals();
+            return new LambdaFormals(res);
         } else {
             SchemeIdentifier formals;
             try {
@@ -237,8 +322,8 @@ public class Tokenizer {
             }catch (EmptyTokenException e) {
                 throw new IOException("Illegal lambda expression");
             }
+            return new LambdaFormals(formals);
         }
-        return null; //FIXME
     }
 
     public Value nextQuotation() throws IOException {
@@ -251,8 +336,13 @@ public class Tokenizer {
                 return nextString();
         }
 
-        if (Character.isDigit(c) || c == '-')
-            return nextNum();
+        if (Character.isDigit(c) || c == '-') {
+            mark();
+            String s = nextToken();
+            try{
+                return nextNum(s);
+            } catch (NumberFormatException e) {}
+        }
 
         try {
             return nextSymbol();
@@ -261,19 +351,14 @@ public class Tokenizer {
         }
     }
 
-    public Cons nextQuotedList() throws IOException {
+    public Pair nextQuotedList() throws IOException {
         Value car = nextQuotation();
         if (skipSpace() == EOList) {
             next();
-            return new Cons(car, Cons.NULL);
+            return new Pair(car, Pair.NULL);
         } else {
-            return new Cons(car, nextQuotedList());
+            return new Pair(car, nextQuotedList());
         }
-    }
-
-    //FIXME
-    private Cons nextQuotedCons() {
-        return new Cons(new SchemeSymbol("Not"), new SchemeSymbol("Implemented"));
     }
 
     public SchemeString nextString() throws IOException {
@@ -320,21 +405,19 @@ public class Tokenizer {
         return new SchemeString(res.toString());
     }
 
-    /* TODO: more numbers! */
-    public SchemeNum nextNum() throws IOException {
-        char c;
-        int res=0;
-
-        while (Character.isDigit(c=next())) {
-            res *= 10;
-            res += c-'0';
+    public SchemeNum nextNum(String n) throws IOException, NumberFormatException {
+        try {
+            return new SchemeNum(new BigInteger(n));
+        } catch (NumberFormatException e) {
+            return new SchemeNum(new BigDecimal(n));
         }
-        back();
-
-        return new SchemeNum(res);
     }
 
-    private class EmptyTokenException extends Exception {
+    private class EmptyTokenException extends RuntimeException {
+
+    }
+
+    private class EndOfListException extends IOException { // IOException? nah :/
 
     }
 }
