@@ -59,7 +59,7 @@ public class Evaluator {
     }
 
     public static boolean isAssignment(Value exp) {
-        return false; // FIXME
+        return exp instanceof SetBang;
     }
 
     public static boolean isLambda(Value exp) {
@@ -93,7 +93,10 @@ public class Evaluator {
     }
 
     public static Value evalAssignment(Value exp, Frame env) {
-        return new SchemeSymbol("Assignments-not-yet-implemented");
+        SetBang s = (SetBang) exp;
+        Value v = eval(s.getBody(), env);
+        env.setBang(s.getIdentifier(), v);
+        return v;
     }
 
     public static Value evalIf(Value exp, Frame env) {

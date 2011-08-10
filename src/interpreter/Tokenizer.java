@@ -223,7 +223,9 @@ public class Tokenizer {
             if ("if".equals(t))
                 return nextIf();
             if ("define".equals(t))
-            	return nextDefine();
+                return nextDefine();
+            if ("set!".equals(t))
+                return nextSetBang();
         } catch (EmptyTokenException e) {}
         reset();
         // not special form
@@ -261,12 +263,21 @@ public class Tokenizer {
     }
     
     private Define nextDefine() throws IOException {
-    	SchemeIdentifier id = nextIdentifier();
-    	Value val = nextValue();
-    	skipSpace();
-    	if (next() != EOList)
-    		throw new EndOfListException();
-    	return new Define(id, val);
+        SchemeIdentifier id = nextIdentifier();
+        Value val = nextValue();
+        skipSpace();
+        if (next() != EOList)
+            throw new EndOfListException();
+        return new Define(id, val);
+    }
+
+    private SetBang nextSetBang() throws IOException {
+        SchemeIdentifier id = nextIdentifier();
+        Value val = nextValue();
+        skipSpace();
+        if (next() != EOList)
+            throw new EndOfListException();
+        return new SetBang(id, val);
     }
 
     public Quote nextQuote() throws IOException {

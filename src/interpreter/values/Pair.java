@@ -21,7 +21,7 @@ public class Pair implements Value {
         if (list.size() == 0)
             throw new IllegalArgumentException("Too short list!");
         this.car = list.remove(0);
-        if (delay.size() == 0) {
+        if (list.size() == 0) {
             cdr = NULL;
         } else {
             delay = list;
@@ -38,6 +38,8 @@ public class Pair implements Value {
             return true;
         if (this.cdr instanceof Pair)
             return ((Pair) this.cdr).isProperList();
+        if (delay != null)
+            return true;
         return false;
     }
 
@@ -46,6 +48,8 @@ public class Pair implements Value {
             return this.cdr == NULL;
         if (this.cdr instanceof Pair)
             return ((Pair) this.cdr).isProperListOfLength(len-1);
+        if (delay != null)
+            return 1+delay.size() == len;
         return false;
     }
 
