@@ -33,10 +33,19 @@ public class Evaluator {
                 return new Bounce(new CompoundProcedure(e.getAlternative(), env));
             }
         } else if (isConditional(exp)) {
-            ret = evalConditional(exp, env); // Maybe getConditionalClauses(exp);
+            ret = evalConditional(exp, env);
         } else if (isApplication(exp)) {
-            ret = apply(eval(getOperator(exp), env),
-                    getListOfValues(getOperands(exp), env));
+            Value op = eval(getOperator(exp), env);
+            List<Value> args = getListOfValues(getOperands(exp), env);
+            if (op instanceof CompoundProcedure) {
+                CompoundProcedure o = (CompoundProcedure) op;
+                return new Bounce(new CompoundProcedure(o.getBody(), o.getEnvironment(args)));
+            } else {
+                ret = apply(op, args);
+            }
+
+//          ret = apply(eval(getOperator(exp), env),
+//                  getListOfValues(getOperands(exp), env));
         } else if (exp instanceof Tail) {
             Tail t = (Tail) exp;
             return new Bounce(new CompoundProcedure(t.getBody(), env));
@@ -45,16 +54,13 @@ public class Evaluator {
             long start = System.currentTimeMillis();
             Value v = eval(t.getValue(), env);
             long end = System.currentTimeMillis();
-            System.out.printf("%d seconds elapsed\n", (end-start)/1000F);
+            System.out.printf("%f seconds elapsed\n", (end-start)/1000F);
             return v;
         } else {
             throw new RuntimeException(String.format("Unknown expression: %s", exp));
         }
 
         return ret;
-    }
-
-    public static void repl() {
     }
 
     /* TODO: more self-evaluating types */
@@ -137,8 +143,9 @@ public class Evaluator {
             }
             return ((Primitive) operator).apply(args);
         }
+
         if (!(operator instanceof CompoundProcedure))
-            throw new IllegalArgumentException("Trying to apply a non-procedure");
+            throw new IllegalArgumentException("Trying to apply a non-procedure: "+operator);
         CompoundProcedure proc = (CompoundProcedure) operator;
         Value ret = evalSequence(proc.getBody(), proc.getEnvironment(args));
         return ret;
@@ -147,7 +154,10 @@ public class Evaluator {
     public static Value evalSequence(List<Value> body, Frame env) {
         int i;
         for (i = 0; i < body.size()-1; i++) {
-            eval(body.get(0), env);
+            Value v = body.get(i);
+            v = eval(v, env);
+            if (v instanceof Bounce)
+                Bounce.trampoline(v);
         }
 
         return eval(body.get(i), env);

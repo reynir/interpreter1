@@ -1,10 +1,11 @@
 package interpreter.values;
+
 import interpreter.Frame;
 
 import java.util.List;
 import java.util.ArrayList;
 
-public class CompoundProcedure implements Value {
+public class CompoundProcedure implements Value, Procedure {
     private Frame env;
     private List<Value> body;
     private LambdaFormals params;
