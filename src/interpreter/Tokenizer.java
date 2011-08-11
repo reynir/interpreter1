@@ -230,6 +230,8 @@ public class Tokenizer {
                 return nextSetBang();
             if ("tail".equals(t))
                 return nextTail();
+            if ("time".equals(t))
+                return nextTime();
         } catch (EmptyTokenException e) {}
         reset();
         // not special form
@@ -290,6 +292,14 @@ public class Tokenizer {
         if (next() != EOList)
             throw new EndOfListException();
         return new Tail(v);
+    }
+
+    private Time nextTime() throws IOException {
+        Value v = nextValue();
+        skipSpace();
+        if (next() != EOList)
+            throw new EndOfListException();
+        return new Time(v);
     }
 
     public Quote nextQuote() throws IOException {

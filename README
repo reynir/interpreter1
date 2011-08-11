@@ -6,6 +6,8 @@ general.
 It is a horrible mess. The parser resides in Tokenizer.java (wtf!) and it's full
 of FIXMEs and TODOs. It is NOT suited for any use at all. Please go away!!
 
-It does not support proper tail calls as java does not. I have not yet figured
-how to get proper tail calls, but using a byte code interpreter could probably
-work. That's too much work for now, though.
+I hope to implement a reader and a parser so it will be much prettier.
+
+The interpreter does now support proper tail calls. You have to, however, 'tag'
+your tail calls with (tail (call-this ...)). I am sure it's 'easy' to fix, but
+I have not yet decided on how.

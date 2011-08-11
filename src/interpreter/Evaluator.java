@@ -40,6 +40,13 @@ public class Evaluator {
         } else if (exp instanceof Tail) {
             Tail t = (Tail) exp;
             return new Bounce(new CompoundProcedure(t.getBody(), env));
+        } else if (exp instanceof Time) {
+            Time t = (Time) exp;
+            long start = System.currentTimeMillis();
+            Value v = eval(t.getValue(), env);
+            long end = System.currentTimeMillis();
+            System.out.printf("%d seconds elapsed\n", (end-start)/1000F);
+            return v;
         } else {
             throw new RuntimeException(String.format("Unknown expression: %s", exp));
         }
