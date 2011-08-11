@@ -15,6 +15,19 @@ public class CompoundProcedure implements Value {
         this.env = env;
     }
 
+    public CompoundProcedure(List<Value> body, Frame env) {
+        this.env = env;
+        this.body = body;
+        params = new LambdaFormals();
+    }
+
+    public CompoundProcedure(Value body, Frame env) {
+        this.env = env;
+        this.body = new ArrayList();
+        this.body.add(body);
+        params = new LambdaFormals();
+    }
+
     public Frame getEnvironment(List<Value> args) {
         switch(params.type) {
             case VAR_ARGS: 
@@ -43,5 +56,17 @@ public class CompoundProcedure implements Value {
 
     public List<Value> getBody() {
         return body;
+    }
+
+    public String toString() {
+        StringBuilder res = new StringBuilder();
+        res.append("CompoundProcedure[");
+        res.append(params.toString());
+        for (Value v : body) {
+            res.append(", ");
+            res.append(v.toString());
+        }
+        res.append("]");
+        return res.toString();
     }
 }

@@ -9,12 +9,16 @@
   <mkdir dir="${build}"/>
  </target>
 
+ <target name="clean">
+  <delete dir="${build}"/>
+ </target>
+
  <target name="compile" depends="init">
-  <javac includeantruntime="false" srcdir="${src}" destdir="${build}"/>
+  <javac debug="on" debugLevel="lines,vars,source" includeantruntime="false" srcdir="${src}" destdir="${build}"/>
  </target>
 
  <target name="compile-test" depends="init,compile">
-  <javac includeantruntime="false" srcdir="${test}" destdir="${build}"/>
+  <javac debug="on" debugLevel="lines,vars,source" includeantruntime="false" srcdir="${test}" destdir="${build}"/>
  </target>
 
  <target name="build" depends="init,compile,compile-test">

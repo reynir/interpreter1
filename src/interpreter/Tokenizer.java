@@ -193,7 +193,9 @@ public class Tokenizer {
             String s = nextToken();
             try {
                 return nextNum(s);
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            reset();
+            }
         }
         
         String res;
@@ -226,6 +228,8 @@ public class Tokenizer {
                 return nextDefine();
             if ("set!".equals(t))
                 return nextSetBang();
+            if ("tail".equals(t))
+                return nextTail();
         } catch (EmptyTokenException e) {}
         reset();
         // not special form
@@ -278,6 +282,14 @@ public class Tokenizer {
         if (next() != EOList)
             throw new EndOfListException();
         return new SetBang(id, val);
+    }
+
+    private Tail nextTail() throws IOException {
+        Value v = nextValue();
+        skipSpace();
+        if (next() != EOList)
+            throw new EndOfListException();
+        return new Tail(v);
     }
 
     public Quote nextQuote() throws IOException {

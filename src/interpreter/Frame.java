@@ -30,6 +30,7 @@ public class Frame {
         this.enclosingFrame = null;
 
         addBinding("+", new Plus());
+        addBinding("-", new Minus());
         addBinding("bob", new SchemeSymbol("Hej-bob"));
         addBinding("null", Null.NULL);
         addBinding("cons", new Cons());

@@ -45,17 +45,31 @@ public class SchemeNum implements Value {
         }
     }
 
-	public boolean greaterThan(SchemeNum o) {
-		if (real != null) {
-			if (o.real != null)
-				return real.compareTo(o.real) > 0;
-			else
-				return real.compareTo(new BigDecimal(o.integer)) > 0; 
-		} else {
-			if (o.real != null)
-				return o.real.compareTo(new BigDecimal(integer)) < 0;
-			else	
-				return o.integer.compareTo(integer) < 0;
-		}
-	}
+    public SchemeNum subtract(SchemeNum o) {
+        if (real != null) {
+            if (o.real != null)
+                return new SchemeNum(real.subtract(o.real));
+            else
+                return new SchemeNum(real.subtract(new BigDecimal(o.integer)));
+        } else {
+            if (o.real != null)
+                return new SchemeNum((new BigDecimal(integer)).subtract(o.real));
+            else
+                return new SchemeNum(integer.subtract(o.integer));
+        }
+    }
+
+    public boolean greaterThan(SchemeNum o) {
+        if (real != null) {
+            if (o.real != null)
+                return real.compareTo(o.real) > 0;
+            else
+                return real.compareTo(new BigDecimal(o.integer)) > 0; 
+        } else {
+            if (o.real != null)
+                return o.real.compareTo(new BigDecimal(integer)) < 0;
+            else	
+                return o.integer.compareTo(integer) < 0;
+        }
+    }
 }

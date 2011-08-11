@@ -42,7 +42,7 @@ public class Compare {
 		Value fst = args.get(0);
 		Value snd = args.get(1);
 		if (!(fst instanceof SchemeNum) || !(snd instanceof SchemeNum))
-			throw new IllegalArgumentException("Wrong type, yo");
+			throw new IllegalArgumentException("Wrong type: " + fst + " or " + snd);
 		return true;
 	}
 }

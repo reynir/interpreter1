@@ -22,9 +22,10 @@ public class EvalTest {
                     System.out.print("$$ ");
                     System.out.flush();
                     res = t.nextValue();
-                    System.out.println(Evaluator.eval(res, env));
+                    System.out.println(Evaluator.repl(res, env));
                 } catch(StackOverflowError e) {
-                    System.err.println("Stack overflow!");
+                    System.out.println("Stack overflow!");
+                    e.printStackTrace();
                 }
             }
         } catch(EOFException e) {
