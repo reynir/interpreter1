@@ -119,8 +119,17 @@ public class Evaluator {
     }
 
     public static Value apply(Value operator, List<Value> args) {
-        if (operator instanceof Primitive)
+        if (operator instanceof Primitive) {
+            /* Trampoline any Bounces */
+            for (int i=0; i < args.size(); i++) {
+                Value v = args.get(i);
+                if (v instanceof Bounce) {
+                    args.remove(i);
+                    args.add(i, Bounce.trampoline(v));
+                }
+            }
             return ((Primitive) operator).apply(args);
+        }
         if (!(operator instanceof CompoundProcedure))
             throw new IllegalArgumentException("Trying to apply a non-procedure");
         CompoundProcedure proc = (CompoundProcedure) operator;
