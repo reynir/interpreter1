@@ -235,17 +235,17 @@ public class Tokenizer {
             next();
             return new Pair(car, Pair.NULL);
         } else {
-            return new Pair(car, nextCons());
+            return new Pair(car, nextPair());
         }
     }
 
-    private Value nextCons() throws IOException {
+    private Value nextPair() throws IOException {
         Value car = nextValue();
         if (skipSpace() == EOList) {
             next();
             return new Pair(car, Pair.NULL);
         } else {
-            return new Pair(car, nextCons());
+            return new Pair(car, nextPair());
         }
     }
 

@@ -18,7 +18,7 @@ public class Evaluator {
         } else if (isAssignment(exp)) {
             return evalAssignment(exp, env);
         } else if (isLambda(exp)) {
-            return new Procedure((Lambda) exp, env);
+            return new CompoundProcedure((Lambda) exp, env);
         } else if (isIf(exp)) {
             return evalIf(exp, env);
         } else if (isConditional(exp)) {
@@ -116,9 +116,9 @@ public class Evaluator {
     public static Value apply(Value operator, List<Value> args) {
         if (operator instanceof Primitive)
             return ((Primitive) operator).apply(args);
-        if (!(operator instanceof Procedure))
+        if (!(operator instanceof CompoundProcedure))
             throw new IllegalArgumentException("Trying to apply a non-procedure");
-        Procedure proc = (Procedure) operator;
+        CompoundProcedure proc = (CompoundProcedure) operator;
         return evalSequence(proc.getBody(), proc.getEnvironment(args));
     }
 
