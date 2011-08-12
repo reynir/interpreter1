@@ -2,7 +2,7 @@ package interpreter.values;
 
 
 public class SchemeString implements Value {
-    private String s;
+    private final String s;
 
     public SchemeString(String s) {
         this.s = s;

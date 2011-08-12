@@ -5,21 +5,25 @@ import java.util.List;
 public class LambdaFormals {
     public enum Type {VAR_ARGS, FIXED_ARGS, NO_ARGS};
     public final Type type;
-    private List<SchemeIdentifier> fixedArgs;
-    private SchemeIdentifier varArgs;
+    private final List<SchemeIdentifier> fixedArgs;
+    private final SchemeIdentifier varArgs;
 
     public LambdaFormals(List<SchemeIdentifier> args) {
         type = Type.FIXED_ARGS;
         fixedArgs = args;
+        varArgs = null;
     }
 
     public LambdaFormals(SchemeIdentifier args) {
         type = Type.VAR_ARGS;
         varArgs = args;
+        fixedArgs = null;
     }
 
     public LambdaFormals() {
         type = Type.NO_ARGS;
+        varArgs = null;
+        fixedArgs = null;
     }
 
     public Type getType() {

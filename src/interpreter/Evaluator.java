@@ -52,7 +52,7 @@ public class Evaluator {
         } else if (exp instanceof Time) {
             Time t = (Time) exp;
             long start = System.currentTimeMillis();
-            Value v = eval(t.getValue(), env);
+            Value v = Bounce.trampoline(eval(t.getValue(), env));
             long end = System.currentTimeMillis();
             System.out.printf("%f seconds elapsed\n", (end-start)/1000F);
             return v;

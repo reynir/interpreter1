@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class CompoundProcedure implements Value, Procedure {
-    private Frame env;
-    private List<Value> body;
-    private LambdaFormals params;
+    private final Frame env;
+    private final List<Value> body;
+    private final LambdaFormals params;
 
     public CompoundProcedure(Lambda l, Frame env) {
         params = l.getFormals();

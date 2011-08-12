@@ -4,7 +4,7 @@ package interpreter.values;
 public class SchemeBoolean implements Value {
     public static final SchemeBoolean TRUE = new SchemeBoolean(true);
     public static final SchemeBoolean FALSE = new SchemeBoolean(false);
-    private boolean v;
+    private final boolean v;
 
     private SchemeBoolean(boolean v) {
         this.v = v;

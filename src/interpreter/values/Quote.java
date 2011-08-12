@@ -2,7 +2,7 @@ package interpreter.values;
 
 
 public class Quote implements Value {
-    private Value quoted;
+    private final Value quoted;
 
     public Quote(Value toQuote) {
         this.quoted = toQuote;

@@ -2,19 +2,22 @@ package interpreter.values;
 import java.math.*;
 
 public class SchemeNum implements Value {
-    private BigInteger integer;
-    private BigDecimal real;
+    private final BigInteger integer;
+    private final BigDecimal real;
 
     public SchemeNum(int v) {
         integer = BigInteger.valueOf(v);
+        real = null;
     }
 
     public SchemeNum(BigInteger v) {
         integer = v;
+        real = null;
     }
 
     public SchemeNum(BigDecimal v) {
         real = v;
+        integer = null;
     }
 
     public String toString() {
