@@ -8,6 +8,4 @@ of FIXMEs and TODOs. It is NOT suited for any use at all. Please go away!!
 
 I hope to implement a reader and a parser so it will be much prettier.
 
-The interpreter does now support proper tail calls. You have to, however, 'tag'
-your tail calls with (tail (call-this ...)). I am sure it's 'easy' to fix, but
-I have not yet decided on how.
+The interpreter supports proper tail calls by trampolining.
