@@ -3,14 +3,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Pair implements Value {
-    private Value car;
+    private final Value car;
     private Value cdr;
     private List<Value> delay;
     public static final Value NULL = Null.NULL;
-
-    public Pair() {
-
-    }
 
     public Pair(Value car, Value cdr) {
         this.car = car;
@@ -18,8 +14,10 @@ public class Pair implements Value {
     }
 
     public Pair(List<Value> list) {
-        if (list.size() == 0)
+        if (list.size() == 0) {
+            car = null;
             throw new IllegalArgumentException("Too short list!");
+        }
         this.car = list.remove(0);
         if (list.size() == 0) {
             cdr = NULL;

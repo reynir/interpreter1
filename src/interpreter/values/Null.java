@@ -2,7 +2,7 @@ package interpreter.values;
 
 
 public final class Null implements Value {
-    public static Null NULL = new Null();
+    public static final Null NULL = new Null();
 
     private Null() {
 

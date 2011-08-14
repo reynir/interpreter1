@@ -3,7 +3,7 @@ package interpreter;
 import interpreter.values.Value;
 
 public class Time implements Value {
-    private Value v;
+    private final Value v;
 
     public Time(Value v) {
         this.v = v;

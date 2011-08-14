@@ -24,7 +24,7 @@ public class CompoundProcedure implements Value, Procedure {
 
     public CompoundProcedure(Value body, Frame env) {
         this.env = env;
-        this.body = new ArrayList();
+        this.body = new ArrayList<Value>();
         this.body.add(body);
         params = new LambdaFormals();
     }
